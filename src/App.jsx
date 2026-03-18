@@ -41,11 +41,13 @@ export default function AssemblyEndgame() {
     );
   });
 
-  const letterElements = currentWord.split("").map((letter, index) => {
-    const isGuessed = guessedLetters.includes(letter);
-
-    return <span key={index}>{isGuessed ? letter.toUpperCase() : ""}</span>;
-  });
+  const letterElements = currentWord
+    .split("")
+    .map((letter, index) => (
+      <span key={index}>
+        {guessedLetters.includes(letter) ? letter.toUpperCase() : ""}
+      </span>
+    ));
 
   const keyboardElements = alphabet.split("").map((letter) => {
     const isGuessed = guessedLetters.includes(letter);
@@ -68,6 +70,33 @@ export default function AssemblyEndgame() {
     );
   });
 
+  const gameStatusClass = clsx("game-status", {
+    won: isGameWon,
+    lost: isGameLost,
+  });
+
+  function renderGameStatus() {
+    if (!isGameOver) {
+      return null;
+    }
+
+    if (isGameWon) {
+      return (
+        <>
+          <h2>You win!</h2>
+          <p>Well done! 🎉</p>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <h2>Game over!</h2>
+          <p>You lose! Better start learning Assembly 😭</p>
+        </>
+      );
+    }
+  }
+
   return (
     <main>
       <header>
@@ -78,8 +107,7 @@ export default function AssemblyEndgame() {
         </p>
       </header>
       <section className="game-status">
-        <h2>You win!</h2>
-        <p>Well done! 🎉</p>
+        <section className={gameStatusClass}>{renderGameStatus()}</section>
       </section>
       <section className="language-chips">{languageElements}</section>
       <section className="word">{letterElements}</section>
