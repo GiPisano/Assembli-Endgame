@@ -6,6 +6,10 @@ export default function AssemblyEndgame() {
   const [currentWord, setCurrentWord] = useState("react");
   const [guessedLetters, setGuessedLetters] = useState([]);
 
+  const wrongGuessCount = guessedLetters.filter(
+    (letter) => !currentWord.includes(letter),
+  ).length;
+
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
   function addGuessedLetter(letter) {
@@ -14,21 +18,25 @@ export default function AssemblyEndgame() {
     );
   }
 
-  const languageElements = languages.map((lang) => {
+  const languageElements = languages.map((lang, index) => {
+    const isLanguageLost = index < wrongGuessCount;
     const styles = {
       backgroundColor: lang.backgroundColor,
       color: lang.color,
     };
+    const className = clsx("chip", isLanguageLost && "lost");
     return (
-      <span className="chip" style={styles} key={lang.name}>
+      <span className={className} style={styles} key={lang.name}>
         {lang.name}
       </span>
     );
   });
 
-  const letterElements = currentWord
-    .split("")
-    .map((letter, index) => <span key={index}>{letter.toUpperCase()}</span>);
+  const letterElements = currentWord.split("").map((letter, index) => {
+    const isGuessed = guessedLetters.includes(letter);
+
+    return <span key={index}>{isGuessed ? letter.toUpperCase() : ""}</span>;
+  });
 
   const keyboardElements = alphabet.split("").map((letter) => {
     const isGuessed = guessedLetters.includes(letter);
