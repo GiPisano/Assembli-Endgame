@@ -2,10 +2,13 @@ import { useState } from "react";
 import { languages } from "./languages";
 import { clsx } from "clsx";
 import { getFarewellText, getRandomWord } from "./utils";
+import { useWindowSize } from "react-use";
+import Confetti from "react-confetti";
 
 export default function AssemblyEndgame() {
+  const { width, height } = useWindowSize();
   // State values
-  const [currentWord, setCurrentWord] = useState(getRandomWord);
+  const [currentWord, setCurrentWord] = useState(() => getRandomWord());
   const [guessedLetters, setGuessedLetters] = useState([]);
 
   // Derived values
@@ -24,6 +27,11 @@ export default function AssemblyEndgame() {
 
   // Static values
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+  function newGame() {
+    setCurrentWord(getRandomWord());
+    setGuessedLetters([]);
+  }
 
   function addGuessedLetter(letter) {
     setGuessedLetters((prevLetters) =>
@@ -45,13 +53,17 @@ export default function AssemblyEndgame() {
     );
   });
 
-  const letterElements = currentWord
-    .split("")
-    .map((letter, index) => (
-      <span key={index}>
-        {guessedLetters.includes(letter) ? letter.toUpperCase() : ""}
+  const letterElements = currentWord.split("").map((letter, index) => {
+    const shouldRevealLetter = isGameLost || guessedLetters.includes(letter);
+    const letterClassName = clsx(
+      isGameLost && !guessedLetters.includes(letter) && "missed-letter",
+    );
+    return (
+      <span key={index} className={letterClassName}>
+        {shouldRevealLetter ? letter.toUpperCase() : ""}
       </span>
-    ));
+    );
+  });
 
   const keyboardElements = alphabet.split("").map((letter) => {
     const isGuessed = guessedLetters.includes(letter);
@@ -111,6 +123,7 @@ export default function AssemblyEndgame() {
 
   return (
     <main>
+      {isGameWon && <Confetti width={width} height={height} />}
       <header>
         <h1>Assembly: Endgame</h1>
         <p>
@@ -124,7 +137,11 @@ export default function AssemblyEndgame() {
       <section className="language-chips">{languageElements}</section>
       <section className="word">{letterElements}</section>
       <section className="keyboard">{keyboardElements}</section>
-      {isGameOver && <button className="new-game">New Game</button>}
+      {isGameOver && (
+        <button onClick={newGame} className="new-game">
+          New Game
+        </button>
+      )}
     </main>
   );
 }
